@@ -93,4 +93,18 @@ public class ArticleController {
         this.articleService.delete(article);
         return "redirect:/";
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/vote/{id}")
+    @ResponseBody
+    public String articleVote(Principal principal, @PathVariable("id") Integer id) {
+        Article article = this.articleService.getArticle(id);
+        SiteUser siteUser = this.userService.getUser(principal.getName());
+        this.articleService.vote(article, siteUser);
+
+        Article votedArticle = this.articleService.getArticle(id);
+        Integer count = votedArticle.getVoter().size();
+
+        return count.toString();
+    }
 }

@@ -6,6 +6,10 @@
         <div class="card-body">
             <div class="card-text" style="white-space: pre-line;" th:text="${article.content}"></div>
             <div class="d-flex justify-content-end">
+                <div th:if="${article.modifyDate != null}" class="badge bg-light text-dark p-2 text-start mx-3">
+                    <div class="mb-2">modified at</div>
+                    <div th:text="${#temporals.format(article.modifyDate, 'yyyy-MM-dd HH:mm')}"></div>
+                </div>
                 <div class="badge bg-light text-dark p-2 text-start">
                     <div class="mb-2">
                         <span th:if="${article.author != null}" th:text="${article.author.username}"></span>
@@ -14,6 +18,12 @@
                 </div>
             </div>
             <div class="my-3">
+                <a id = "article_recommend"
+                   class="recommend btn btn-sm btn-outline-secondary"
+                >
+                    추천
+                    <span id="recommend_article_count" class="badge rounded-pill bg-success" th:text="${#lists.size(article.voter)}"></span>
+                </a>
                 <a th:href="@{|/article/modify/${article.id}|}" class="btn btn-sm btn-outline-secondary"
                    sec:authorize="isAuthenticated()"
                    th:if="${article.author != null and #authentication.getPrincipal().getUsername() == article.author.username}"
@@ -28,3 +38,21 @@
     <a th:href="@{/article/list}" class="btn btn-primary">목록보기</a>
 </div>
 </html>
+<script th:inline="javascript">
+    var article_id = [[${article.id}]]
+
+    $('#article_recommend').on("click", function () {
+        if (confirm("정말로 추천하시겠습니까?")) {
+            $.ajax({
+                    type: "GET",
+                    url: `/article/vote/${article_id}`,
+                    success: function (res) {
+                        $("#recommend_article_count").text(res)
+                    },
+                    error: function (xhr) {
+                        console.log(xhr)
+                    }
+           })
+        }
+    })
+</script>
